@@ -15,22 +15,23 @@ import (
 var lastDayFlow float64 = 0.0
 
 func main() {
-	bot := dingtalk.InitDingTalkWithSecret("ea098c62f330ea3ad7fa7d0dbc09f262777ae9325332da668f89d95f1bf30da6", "SECb2847ebb5940e68a2dabc9e25cf4a280d6cbe08e32a38a11c5059b8817c33123")
+	bot := dingtalk.InitDingTalkWithSecret("ea098c62f230ea3ad7fa7d0dbc09f262777ae9325332da668f89d95f1bf30da6", "SECb2847ebb5940e68a2dabc9e25cf4a280d6cbe08e32a38a11c5059b8817c33123")
+	// 启动时的消息提醒
 	bot.SendTextMessage("订阅服务已经启动")
-	//每天晚上九点半汇报当时的流量情况
+	// 启动时先汇报当时的流量情况
 	tellTheFlow()
-	testSpeed()
 	gocron.Every(1).Day().At("21:30").Do(tellTheFlow)
-	//每天早上七点半、中午十一点半、晚上八点半测速
+	// 每天早上七点半、中午十一点半、晚上八点半测速并汇报
 	gocron.Every(1).Day().At("07:30").Do(testSpeed)
 	gocron.Every(1).Day().At("11:30").Do(testSpeed)
 	gocron.Every(1).Day().At("20:30").Do(testSpeed)
+	// ... 其他需要定时提醒的操作
 	<-gocron.Start()
 }
 
 func tellTheFlow() {
-	bot := dingtalk.InitDingTalkWithSecret("ea098c62f330ea3ad7fa7d0dbc09f262777ae9325332da668f89d95f1bf30da6", "SECb2847ebb5940e68a2dabc9e25cf4a280d6cbe08e32a38a11c5059b8817c33123")
-	resp, err := http.Get("http://mxkj089.cn/app/simCard/phoneSimCard?card=03224303")
+	bot := dingtalk.InitDingTalkWithSecret("ea098c62f230ea3ad7fa7d0dbc09f262777ae9325332da668f89d95f1bf30da6", "SECb2847ebb5940e68a2dabc9e25cf4a280d6cbe08e32a38a11c5059b8817c33123")
+	resp, err := http.Get("http://mxkj089.cn/app/simCard/phoneSimCard?card=03224302")
 	if err != nil {
 		bot.SendTextMessage("获取CPE当前流量失败")
 		return
@@ -40,7 +41,7 @@ func tellTheFlow() {
 	var jsonMap map[string]any
 	json.Unmarshal(body, &jsonMap)
 	if jsonMap["code"].(float64) == 0 {
-		var msg = "### 流量使用情况" //"获取当前CPE流量" + jsonMap["msg"].(string)
+		var msg = "### 内网总线1 流量使用情况" //"获取当前CPE流量" + jsonMap["msg"].(string)
 		msg += "  \n- 流量总量：" + fmt.Sprintf("%.2f", jsonMap["data"].(map[string]any)["sumFlow"].(float64)) + "MB"
 		msg += "  \n- 已用流量：" + fmt.Sprintf("%.2f", jsonMap["data"].(map[string]any)["consumeFlow"].(float64)) + "MB"
 		msg += "  \n- 剩余流量：" + fmt.Sprintf("%.2f", jsonMap["data"].(map[string]any)["surplusFlow"].(float64)) + "MB"
@@ -53,7 +54,7 @@ func tellTheFlow() {
 		bot.SendMarkDownMessage("流量使用情况", msg)
 		return
 	} else {
-		get, err := http.Get("http://mxkj089.cn/app/simCard/getCardFlow?card=03224303")
+		get, err := http.Get("http://mxkj089.cn/app/simCard/getCardFlow?card=03224302")
 		if err != nil {
 			bot.SendTextMessage("备线获取CPE当前流量失败")
 			return
@@ -63,7 +64,7 @@ func tellTheFlow() {
 		var jsonMap map[string]any
 		json.Unmarshal(body, &jsonMap)
 		if jsonMap["code"].(float64) == 0 {
-			var msg = "### 流量使用情况" //"获取当前CPE流量" + jsonMap["msg"].(string)
+			var msg = "### 内网总线1 流量使用情况" //"获取当前CPE流量" + jsonMap["msg"].(string)
 			msg += "  \n- 流量总量：" + fmt.Sprintf("%.2f", jsonMap["data"].(map[string]any)["sumFlow"].(float64)) + "MB"
 			msg += "  \n- 已用流量：" + fmt.Sprintf("%.2f", jsonMap["data"].(map[string]any)["consumeFlow"].(float64)) + "MB"
 			msg += "  \n- 剩余流量：" + fmt.Sprintf("%.2f", jsonMap["data"].(map[string]any)["surplusFlow"].(float64)) + "MB"
@@ -81,7 +82,7 @@ func tellTheFlow() {
 
 func testSpeed() {
 	bot := dingtalk.InitDingTalkWithSecret("ea098c62f330ea3ad7fa7d0dbc09f262777ae9325332da668f89d95f1bf30da6", "SECb2847ebb5940e68a2dabc9e25cf4a280d6cbe08e32a38a11c5059b8817c33123")
-	msg := "### 测速汇总"
+	msg := "### 内网总线1 测速汇总"
 	msg += "  \n- 百度服务器：" + getSpeed("www.baidu.com:80")
 	msg += "  \n- 腾讯服务器：" + getSpeed("www.qq.com:80")
 	msg += "  \n- 阿里服务器：" + getSpeed("www.aliyun.com:80")
